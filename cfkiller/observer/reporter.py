@@ -37,9 +37,10 @@ class PDFReporter:
         return filename
 
     def _get_recommendation(self, stats, mode):
-        if mode == "rapidreset" and stats["rps"] > 50000:
+        mode_l = (mode or '').lower()
+        if ("rapid" in mode_l or "rapidreset" in mode_l) and stats.get("rps", 0) > 50000:
             return "CRÍTICO: Servidor vulnerable a HTTP/2 Rapid Reset (CVE-2023-44487). Aplicar parche urgente."
-        elif stats["blocked"] / max(stats["requests"], 1) > 0.7:
+        elif stats.get("blocked", 0) / max(stats.get("requests", 0), 1) > 0.7:
             return "WAF efectivo. Bot Management bien configurado."
         else:
             return "Configuración segura, pero revisar rate limiting y caching."

