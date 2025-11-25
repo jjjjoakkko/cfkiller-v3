@@ -130,13 +130,65 @@ asyncio.run(attacker.attack())
 
 ## Soporte y mejoras
 Abre un issue en el repositorio para bugs o feature requests.
-⚠️ ADVERTENCIA LEGAL – USO RESTRINGIDO ⚠️
 
-Esta herramienta es exclusivamente para:
-- Pentesting autorizado con Rules of Engagement (RoE) firmado
-- Hardening y stress testing de infraestructura propia
-- Investigación y educación en entornos controlados
+---
 
-Cualquier uso no autorizado (DDoS, extorsión, ataque a terceros sin permiso) es delito penal en prácticamente todos los países (CFAA, leyes de delitos informáticos, etc.).
+## Instalación y uso en Linux / Kali
 
-El autor no se hace responsable por mal uso.git pull origin main --rebase
+Si un usuario desea ejecutar la herramienta en Linux (incluido Kali), los pasos recomendados son:
+
+1) Actualizar el sistema e instalar dependencias del sistema:
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y python3 python3-venv python3-dev build-essential \
+    libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev libcairo2 libpango-1.0-0 libgdk-pixbuf2.0-0 libjpeg-dev libcurl4-openssl-dev
+```
+
+2) Crear y activar un entorno virtual (recomendado):
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+3) Instalar dependencias Python:
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+o usando Poetry:
+```bash
+pip install poetry
+poetry install
+```
+
+4) Instalar navegadores para Playwright (si se usa el módulo `browser`):
+```bash
+python -m playwright install
+# o solo instalar chromium si lo prefieres
+python -m playwright install chromium
+```
+
+5) Verificar instalación y ejecutar un ejemplo (Rapid Reset):
+```bash
+python main.py rapid example.com -t 20 -c 10 -i 200
+```
+
+6) Consideraciones especiales para Kali Linux:
+- Kali suele ejecutarse como root; se recomienda usar un entorno virtual y un usuario no-root para instalaciones seguras.
+- Algunas dependencias (p. ej. librerías nativas de WeasyPrint) requieren instalar paquetes del sistema (Cairo, Pango, etc.) — ya incluidos arriba.
+- Si `curl-cffi` muestra errores en la instalación o en la importación de `AsyncClient`, instala `libcurl4-openssl-dev` y `libffi-dev` antes de reinstalar paquetes de Python.
+
+7) Problemas frecuentes y soluciones:
+- Error: `ImportError: cannot import name AsyncClient` → Asegúrate de tener `curl-cffi` instalado y, si es necesario, instala con `pip install curl-cffi`.
+- Error con Playwright: ejecuta `python -m playwright install` o `playwright install` para descargar los binarios de los navegadores.
+- WeasyPrint errores (pdf): instala `libpango1.0-0`, `libgdk-pixbuf2.0-0`, `libcairo2`, `libffi-dev`.
+
+8) Iniciar pruebas o demonios (opcional):
+Para lanzar métricas prometheus localmente mientras trabajas:
+```bash
+python -c "from cfkiller.observer.metrics import start_prometheus_server; start_prometheus_server(8000)"
+```
+
+---
+
+Si quieres que agregue un script `install_linux.sh` que automatice estos pasos, lo hago y lo añado al repo.
